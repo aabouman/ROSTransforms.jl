@@ -1,8 +1,11 @@
-using Test
+#Test if tf listner works correctly
 using RobotOS
 
 
-init_node("jltest", anonymous=true)
+# Initialize node
+init_node("listner", anonymous=true) # delete
 
-
-include("TF.jl")
+# Need to run the listener and broadcaster in parralllel
+script = (`julia --project=@. tf_listener.jl` &
+          `julia --project=@. tf_broadcaster.jl`);
+Base.run(script);
