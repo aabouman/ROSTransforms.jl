@@ -11,24 +11,27 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        version:
-          - '1.5'
-        os:
-          - ubuntu-18.04
+        version: ['1.5']
+        os: [ubuntu-18.04]
         architecture: [x64]
         python-version: ['2.7']
         julia-version: ['1.5', 'nightly']
     steps:
-      - uses: ros-tooling/setup-ros@v0.1
-        with:
-          required-ros-distributions: melodic
       - uses: julia-actions/setup-julia@v1.5
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.architecture }}
-      - name: Launch ROS
+      - name: Install ROS
+        run: |
+          sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+          sudo apt-add-repository -y "deb http://packages.ros.org/ros/ubuntu bionic main"
+          sudo apt-get update
+          sudo apt-get -y install python-rosdep ros-melodic-ros-base ros-melodic-common-msgs
+          sudo rosdep init
+          rosdep update
+      - name: Launch ROS & Test Package
         run: |
           roscore &
           sleep 5
           julia --project=docs/ -e 'using Pkg; Pkg.test("ROSTransforms");'
-          killall roscore 
+          killall roscore
