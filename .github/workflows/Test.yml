@@ -19,16 +19,17 @@ jobs:
         python-version: ['2.7']
         julia-version: ['1.5', 'nightly']
     steps:
-      - uses: ros-tooling/setup-ros@v0.1
-        with:
-          required-ros-distributions: melodic
       - uses: julia-actions/setup-julia@v1.5
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.architecture }}
-      - name: Launch ROS
+      - name:name: Install ROS
+        run: |
+          sudo apt-get update \
+          sudo apt-get -y install python-rosdep ros-melodic-ros-base ros-melodic-common-msgs 
+      - name: Launch ROS & Test Package
         run: |
           roscore & \
           sleep 5 \
           julia --project=docs/ -e 'using Pkg; Pkg.test("ROSTransforms");' \
-          killall roscore \
+          killall roscore
