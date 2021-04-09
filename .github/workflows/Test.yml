@@ -31,6 +31,10 @@ jobs:
           rosdep update
           export PATH=/usr/bin:$PATH
           source /opt/ros/melodic/setup.sh
+          roscore &
+          sleep 5
+          julia --project=docs/ -e 'using Pkg; Pkg.test("ROSTransforms");'
+          killall roscore
       - name: Launch ROS & Test Package
         run: |
           roscore &
