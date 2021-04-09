@@ -26,5 +26,8 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.architecture }}
-      - uses: julia-actions/julia-buildpkg@v1
-      - uses: julia-actions/julia-runtest@latest
+      - name: Launch ROS
+        run: roscore &
+        run: sleep 5
+        run: julia --project=docs/ -e 'using Pkg; Pkg.test("ROSTransforms");'
+        run: killall roscore
