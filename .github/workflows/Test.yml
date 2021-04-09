@@ -21,14 +21,10 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.architecture }}
-      - name: Install & Setup ROS
-        run: |
-          sudo apt-get update
-          sudo apt-get -y install python-rosdep ros-melodic-ros-base ros-melodic-common-msgs
-          sudo rosdep init
-          rosdep update
-          export PATH=/usr/bin:$PATH
-          source /opt/ros/melodic/setup.sh
+      - uses: ros-tooling/setup-ros@0.0.25
+        with:
+          required-ros-distributions: melodic
+      - run: "source /opt/ros/melodic/setup.sh && roscore"
           roscore &
           sleep 5
           julia --project=docs/ -e 'using Pkg; Pkg.test("ROSTransforms");'
