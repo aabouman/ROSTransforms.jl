@@ -24,9 +24,9 @@ jobs:
       - uses: ros-tooling/setup-ros@0.0.25
         with:
           required-ros-distributions: melodic
+      - run: "source /opt/ros/melodic/setup.sh && roscore &"
+      - run: "sleep 5 && julia --project=docs/ -e 'using Pkg; Pkg.test("ROSTransforms");'"
       - run: "source /opt/ros/melodic/setup.sh && roscore"
-          roscore &
-          sleep 5
           julia --project=docs/ -e 'using Pkg; Pkg.test("ROSTransforms");'
           killall roscore
       - name: Launch ROS & Test Package
