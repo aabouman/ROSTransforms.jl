@@ -2,30 +2,36 @@ name: Test
 
 on:
   push:
-    tags: '*'
-
+    branches:
+      - master
+      - dev
 jobs:
   test:
-    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
+    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.architecture }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        version:
-          - '1.5'
-        os:
-          - ubuntu-latest
-        arch:
-          - x64
+        version: ['1.5']
+        os: [ubuntu-18.04]
+        architecture: [x64]
+        python-version: ['2.7']
+        julia-version: ['1.5', 'nightly']
     steps:
-      - uses: ros-tooling/setup-ros@v0.1
-        with:
-          required-ros-distributions: melodic
-      - uses: ros-tooling/action-ros-ci@v0.2
-        with:
-          package-name: my_package
-          target-ros1-distro: melodic
-      - uses: julia-actions/setup-julia@latest
+      - uses: julia-actions/setup-julia@v1.5
         with:
           version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
-      - uses: julia-actions/julia-runtest@latest
+          arch: ${{ matrix.architecture }}
+      - uses: ros-tooling/setup-ros@0.0.25
+        with:
+          required-ros-distributions: melodic
+      - run: "source /opt/ros/melodic/setup.sh && roscore &"
+      - run: "sleep 5 && julia --project=docs/ -e 'using Pkg; Pkg.test("ROSTransforms");'"
+      - run: "source /opt/ros/melodic/setup.sh && roscore"
+          julia --project=docs/ -e 'using Pkg; Pkg.test("ROSTransforms");'
+          killall roscore
+      - name: Launch ROS & Test Package
+        run: |
+          roscore &
+          sleep 5
+          julia --project=docs/ -e 'using Pkg; Pkg.test("ROSTransforms");'
+          killall roscore

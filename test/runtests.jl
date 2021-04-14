@@ -2,10 +2,6 @@
 using RobotOS
 
 
-# Initialize node
-init_node("listner", anonymous=true) # delete
 
-# Need to run the listener and broadcaster in parralllel
-script = (`julia --project=@. tf_listener.jl` &
-          `julia --project=@. tf_broadcaster.jl`);
-Base.run(script);
+include("tf/tf_test.jl")
+# include("tf2_ros/tf2_ros_test.jl")
