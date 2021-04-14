@@ -1,10 +1,9 @@
 name = "ROSTransforms"
-uuid = "5cbbf49b-c1ec-41f0-9e14-ed3845d3f19d"
+uuid = "8d357309-4393-4327-832a-9d97e29659d8"
 authors = ["Alexander A. Bouman <alex.bouman@gmail.com>"]
 version = "0.1.0"
 
 [deps]
-Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 RobotOS = "22415677-39a4-5241-a37a-00beabbbdae8"
 Rotations = "6038ab10-8711-5258-84ad-4b1120ba62dc"

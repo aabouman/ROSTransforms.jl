@@ -11,7 +11,10 @@ module tf
         copy!(__tf__, pyimport("tf"))
     end
 
-    export Transform, TransformBroadcaster, sendTransform, TransformListener, lookupTransform, waitForTransform
+    export Transform
+    export TransformBroadcaster, sendTransform
+    export TransformListener, lookupTransform, waitForTransform
+    export transformWrench
 
     """
        Transform(trans, rot)
@@ -141,18 +144,44 @@ module tf
 # ============================================================================#
     """
     """
-    function toSkew(vect::Vector{Real})
+    function toSkew(vect::Vector)
         all(size(vect) .== (3,)) || error("vect must be 3 vector")
-        return [0        vect[3]  vect[2];
-                vect[3]  0        vect[1];
-                vect[2]  vect[1]  0];
+        return [0       -vect[3]  vect[2];
+                vect[3]  0       -vect[1];
+               -vect[2]  vect[1]  0];
     end
 
     """
     """
-    function applyTransform(transform::Transform,
-                            wrench::Any,
-                            )
+    function transformWrench(transform::Transform,
+                             wrench::Any,
+                             )
+        x, y, z, w = transform.rot
+        𝑞ₛₑᵀ = inv(UnitQuaternion(w, x, y, z))
+        p̂ₛₑ = toSkew(transform.trans)
+
+        Adᵀ = [𝑞ₛₑᵀ   zeros(3, 3);
+               -𝑞ₛₑᵀ*p̂ₛₑ  𝑞ₛₑᵀ]
+        𝑓ₛ = [wrench.force.x, wrench.force.y, wrench.force.z,
+             wrench.torque.x, wrench.torque.y, wrench.torque.z];
+        𝑓ₑ = Adᵀ * 𝑓ₛ
+
+        ret_wrench = deepcopy(wrench)
+        ret_wrench.force.x = 𝑓ₑ[1]
+        ret_wrench.force.y = 𝑓ₑ[2]
+        ret_wrench.force.z = 𝑓ₑ[3]
+        ret_wrench.torque.x = 𝑓ₑ[4]
+        ret_wrench.torque.y = 𝑓ₑ[5]
+        ret_wrench.torque.z = 𝑓ₑ[6]
+
+        return ret_wrench
+    end
+
+    """
+    """
+    function transformPose(transform::Transform,
+                           pose::Any,
+                           )
         x, y, z, w = transform.rot
         𝑞ₛₑᵀ = inv(UnitQuaternion(w, x, y, z))
         p̂ₛₑ = toSkew(transform.trans)
@@ -162,5 +191,4 @@ module tf
              wrench.torque.x, wrench.torque.y, wrench.torque.z];
         𝑓ₑ = Adᵀ * 𝑓ₛ
     end
-
 end

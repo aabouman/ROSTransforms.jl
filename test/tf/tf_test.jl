@@ -8,5 +8,6 @@ path = @__DIR__
 
 # Need to run the listener and broadcaster in parralllel
 script = (`julia --project=@. $path/tf_listener.jl` &
-          `julia --project=@. $path/tf_broadcaster.jl`);
+          `julia --project=@. $path/tf_broadcaster.jl` &
+          `julia --project=@. $path/tf_applied.jl`);
 Base.run(script);
