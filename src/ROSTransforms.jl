@@ -1,8 +1,8 @@
 module ROSTransforms
 
 # tf functions
-include("TF.jl")
+include("tf.jl")
 # tf2_ros functions
-include("TF2.jl")
+include("tf2_ros.jl")
 
 end
