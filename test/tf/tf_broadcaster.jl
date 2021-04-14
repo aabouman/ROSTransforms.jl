@@ -20,7 +20,8 @@ sub1 = Subscriber{BoolMsg}("/success", cb, queue_size=10)
 
 r = Rate(20.0)
 for i ∈ 1:1000
-    sendTransform(tb, tf_ref, RobotOS.now(), "child_link", "parent_link")
+    sendTransform(tb, tf_ref.trans, tf_ref.rot, RobotOS.now(), "child_link",
+                  "parent_link")
 
     success && break  # Break if the listener heard the broadcaster
     rossleep(r)

@@ -37,9 +37,9 @@ module tf2_ros
     end
 
 
-    # ============================================================================#
-    #               tf2_ros TransformBroadcaster object and functions
-    # ============================================================================#
+# ============================================================================#
+#               tf2_ros TransformBroadcaster object and functions
+# ============================================================================#
     """
         TransformBroadcaster()
     Create a transform broadcaster object.
