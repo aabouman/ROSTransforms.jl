@@ -1,8 +1,9 @@
 name: Doc Preview Cleanup
 
 on:
-  pull_request:
-    types: [closed]
+  push:
+    branches:
+      - master
 
 jobs:
   doc-preview-cleanup:
