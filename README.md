@@ -12,7 +12,7 @@ installed the tf libraries.
 
 ```julia
 julia> using PyCall
-julia> julia> ENV["PYTHON"]="/usr/bin/python2.7"
+julia> ENV["PYTHON"]="/usr/bin/python2.7"
 julia> using Pkg
 julia> Pkg.build("PyCall")
 ```
