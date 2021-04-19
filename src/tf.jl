@@ -4,9 +4,11 @@ module tf
     using PyCall
     using Rotations
     using StaticArrays
+    using LinearAlgebra: inv
     import Base.==
     import Base.*
     import Base.rand
+    import Base.inv
 
     const __tf__ = PyCall.PyNULL()
 
@@ -18,7 +20,7 @@ module tf
     export rand
     export TransformBroadcaster, sendTransform
     export TransformListener, lookupTransform, waitForTransform
-    export transformWrench
+    export transformWrench, poseToTransform, poseStampedToTransform
 
     """
        Transform(trans, rot)
@@ -43,6 +45,12 @@ module tf
         return tf3
     end
 
+    function Base.inv(tf::Transform)::Transform
+        # Apply transform
+        tf_inv = RBT2twist(inv(twist2RBT(tf)))
+        return tf_inv
+    end
+
     function twist2RBT(tf::Transform)::Matrix
         x, y, z, w = tf.rot
         rotMat = Matrix(UnitQuaternion(w, x, y, z))
@@ -53,11 +61,14 @@ module tf
     end
 
     function RBT2twist(tfMat::Matrix)::Transform
+        # Translations
+        trans = tfMat[1:3, 4]
+        # Rotations
         rotMat = RotMatrix(SMatrix{3,3}(tfMat[1:3, 1:3]))
         quat = UnitQuaternion(rotMat)
         rot = [quat.x, quat.y, quat.z, quat.w]
 
-        tf = Transform(quat, rot)
+        tf = Transform(trans, rot)
         return tf
     end
 
@@ -216,6 +227,22 @@ module tf
         ret_wrench.torque.z = 𝑓ₑ[6]
 
         return ret_wrench
+    end
+
+    """
+    """
+    function poseToTransform(pose::Any)::Transform
+        trans = [pose.position.x, pose.position.y, pose.position.z]
+        rot = [pose.orientation.x, pose.orientation.y,
+               pose.orientation.z, pose.orientation.w]
+
+        return Transform(trans, rot)
+    end
+
+    """
+    """
+    function poseStampedToTransform(poseStamped::Any)::Transform
+        return poseToTransform(poseStamped.pose)
     end
 
     """
