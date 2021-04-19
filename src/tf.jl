@@ -3,7 +3,10 @@ module tf
     using RobotOS
     using PyCall
     using Rotations
+    using StaticArrays
     import Base.==
+    import Base.*
+    import Base.rand
 
     const __tf__ = PyCall.PyNULL()
 
@@ -12,6 +15,7 @@ module tf
     end
 
     export Transform
+    export rand
     export TransformBroadcaster, sendTransform
     export TransformListener, lookupTransform, waitForTransform
     export transformWrench
@@ -24,8 +28,45 @@ module tf
         trans::Array{Float64}
         rot::Array{Float64}
     end
-    Base.:(==)(tf1::Transform, tf2::Transform) = (tf1.trans == tf2.trans && tf1.rot == tf2.rot)
 
+# =========================================================================== #
+#                      Useful functions on Transform type
+# =========================================================================== #
+    function Base.:(==)(tf1::Transform, tf2::Transform)
+        (all(tf1.trans .== tf2.trans) && all(tf1.rot .== tf2.rot))
+    end
+
+    function Base.:(*)(tf1::Transform, tf2::Transform)::Transform
+        # Apply transform
+        tf3Mat = twist2RBT(tf1) * twist2RBT(tf2)
+        tf3 = RBT2twist(tf3Mat)
+        return tf3
+    end
+
+    function twist2RBT(tf::Transform)::Matrix
+        x, y, z, w = tf.rot
+        rotMat = Matrix(UnitQuaternion(w, x, y, z))
+
+        tfMat = [rotMat   tf.trans;
+                 [0 0 0]  1];
+        return tfMat
+    end
+
+    function RBT2twist(tfMat::Matrix)::Transform
+        rotMat = RotMatrix(SMatrix{3,3}(tfMat[1:3, 1:3]))
+        quat = UnitQuaternion(rotMat)
+        rot = [quat.x, quat.y, quat.z, quat.w]
+
+        tf = Transform(quat, rot)
+        return tf
+    end
+
+    function Base.rand(::Type{Transform})::Transform
+        trans = rand(3)
+        quat = rand(UnitQuaternion)
+        rot = [quat.x, quat.y, quat.z, quat.w]
+        return Transform(trans, rot)
+    end
 
 # ============================================================================#
 #                 tf TransformBroadcaster object and functions
