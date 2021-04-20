@@ -149,7 +149,7 @@ module tf
     function lookupTransform(tl::TransformListener,
                              target_frame::AbstractString,
                              source_frame::AbstractString,
-                             pytime::Time)
+                             pytime::Time)::Transform
         time = convert(PyObject, pytime)
         try
             trans, rot = pycall(tl.o.lookupTransform, PyAny, target_frame,
